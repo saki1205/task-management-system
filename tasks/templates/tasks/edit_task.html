@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
+</head>
+<body>
+    <h1>Edit Task</h1>
+    <form id="edit-task-form" action="{% url 'edit_task' task.id %}" method="post">
+        {% csrf_token %}
+        
+        <!-- Task Name -->
+        <label for="name">Task Name:</label>
+        <input type="text" id="name" name="name" value="{{ task.name }}" required>
+
+        <!-- Task Description -->
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required>{{ task.description }}</textarea>
+
+        <!-- Assign To Dropdown -->
+        <label for="assigned_to">Assigned To:</label>
+        <select id="assigned_to" name="assigned_to" required>
+            {% for employee in employees %}
+                <option value="{{ employee.id }}" {% if employee.id == task.assigned_to.id %}selected{% endif %}>
+                    {{ employee.username }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- Task Deadline -->
+        <label for="deadline">Deadline:</label>
+        <input type="date" id="deadline" name="deadline" value="{{ task.deadline }}" required>
+
+        <!-- Task Priority -->
+        <label for="priority">Priority:</label>
+        <select id="priority" name="priority" required>
+            <option value="High" {% if task.priority == "High" %}selected{% endif %}>High</option>
+            <option value="Medium" {% if task.priority == "Medium" %}selected{% endif %}>Medium</option>
+            <option value="Low" {% if task.priority == "Low" %}selected{% endif %}>Low</option>
+        </select>
+
+        <!-- Task Status -->
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
+            <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+        </select>
+
+        <button type="submit">Update Task</button>
+    </form>
+
+    <script>
+        // Add event listener for form submission
+        document.getElementById('edit-task-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Perform the POST request with form data
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);  // Display success message
+                    window.location.href = '/dashboard/manager_dashboard/';  // Redirect to manager dashboard
+                } else {
+                    alert('Error updating task: ' + JSON.stringify(data.errors));  // Show errors
+                }
+            })
+            .catch(error => console.error('Error:', error));  // Handle any errors
+        });
+    </script>
+</body>
+</html>

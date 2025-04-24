@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Welcome, {{ employee_name }}</h2>
+    
+    <!-- Task Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Total Tasks</h5>
+                    <h3>{{ total_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Completed</h5>
+                    <h3>{{ completed_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>In Progress</h5>
+                    <h3>{{ in_progress_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Pending</h5>
+                    <h3>{{ pending_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h2>Employee Dashboard</h2>
+    <div class="card">
+        <div class="card-header">
+            <h3>My Tasks</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Task Name</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Deadline</th>
+                            <th>Assigned By</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                            <th>Progress Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.name }}</td>
+                            <td>{{ task.description }}</td>
+                            <td>
+                                <span class="badge {% if task.priority == 'High' %}bg-danger
+                                                   {% elif task.priority == 'Medium' %}bg-warning
+                                                   {% else %}bg-success{% endif %}">
+                                    {{ task.priority }}
+                                </span>
+                            </td>
+                            <td>{{ task.deadline|date:"Y-m-d" }}</td>
+                            <td>
+                                {% if task.assigned_by %}
+                                    {{ task.assigned_by.get_full_name|default:task.assigned_by.username }}
+                                {% else %}
+                                    <span class="text-muted">Unknown</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.status }}</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ task.progress_percentage }}%"
+                                         aria-valuenow="{{ task.progress_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ task.progress_percentage }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ task.progress_description|default:"No progress description" }}</td>
+                            <td>
+                                <a href="{% url 'update_task_status' task.id %}" 
+                                   class="btn btn-primary btn-sm">
+                                    Update Status
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No tasks assigned</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

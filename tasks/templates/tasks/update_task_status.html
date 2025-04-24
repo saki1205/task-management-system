@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Update Task Status</h2>
+        </div>
+        <div class="card-body">
+            <form id="update-task-status-form" action="{% url 'update_task_status' task.id %}" method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status:</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="progress_description" class="form-label">Progress Description:</label>
+                    <textarea class="form-control" id="progress_description" name="progress_description" rows="3">{{ task.progress_description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="progress_percentage" class="form-label">Progress Percentage:</label>
+                    <input type="number" class="form-control" id="progress_percentage" name="progress_percentage" 
+                           value="{{ task.progress_percentage }}" min="0" max="100" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Status</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('update-task-status-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = '/dashboard/employee_dashboard/';  // Redirect to employee dashboard
+        } else {
+            alert('Error updating task: ' + JSON.stringify(data.errors));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the task.');
+    });
+});
+</script>
+{% endblock %}

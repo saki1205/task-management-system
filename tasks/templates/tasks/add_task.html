@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Assign a New Task</h2>
+    
+    <form method="POST" id="taskForm" action="{% url 'add_task' %}">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label>Task Name</label>
+            <input type="text" class="form-control" name="task_name" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Description</label>
+            <textarea class="form-control" name="task_description" required></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Deadline</label>
+            <input type="date" class="form-control" name="deadline" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Priority</label>
+            <select class="form-control" name="priority" required>
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Assign To</label>
+            <select class="form-control" name="assigned_to" required>
+                <option value="">Select an employee</option>
+                {% for employee in employees %}
+                    <option value="{{ employee.id }}">
+                        {{ employee.get_full_name|default:employee.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary mt-3">Assign Task</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+    const assignedTo = document.querySelector('select[name="assigned_to"]').value;
+    const taskName = document.querySelector('input[name="task_name"]').value;
+    const description = document.querySelector('textarea[name="task_description"]').value;
+    const priority = document.querySelector('select[name="priority"]').value;
+    
+    if (!assignedTo) {
+        e.preventDefault();
+        alert('Please select an employee to assign the task to.');
+        return false;
+    }
+    
+    if (!taskName.trim()) {
+        e.preventDefault();
+        alert('Please enter a task name.');
+        return false;
+    }
+
+    if (!description.trim()) {
+        e.preventDefault();
+        alert('Please enter a task description.');
+        return false;
+    }
+
+    if (!priority) {
+        e.preventDefault();
+        alert('Please select a priority level.');
+        return false;
+    }
+
+    // Log form data for debugging
+    console.log('Form data:', {
+        taskName,
+        description,
+        assignedTo,
+        priority
+    });
+});
+</script>
+{% endblock %}
